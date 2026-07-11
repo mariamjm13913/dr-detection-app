@@ -18,11 +18,66 @@ import gdown
 from PIL import Image
 from torchvision import transforms
 
-st.set_page_config(page_title="DR Detection", layout="wide")
+st.set_page_config(page_title="DR Detection", page_icon="👁️", layout="wide")
+
+# ---------- Custom CSS ----------
+st.markdown("""
+<style>
+    .main-title {
+        font-size: 2.6rem;
+        font-weight: 800;
+        background: linear-gradient(90deg, #2563eb, #06b6d4);
+        -webkit-background-clip: text;
+        -webkit-text-fill-color: transparent;
+        margin-bottom: 0;
+    }
+    .subtitle {
+        color: #64748b;
+        font-size: 1.05rem;
+        margin-top: 0;
+        margin-bottom: 1.5rem;
+    }
+    .result-card {
+        background: #f8fafc;
+        border-radius: 16px;
+        padding: 1.5rem;
+        border: 1px solid #e2e8f0;
+        margin-top: 1rem;
+    }
+    .confidence-badge {
+        display: inline-block;
+        padding: 0.4rem 1rem;
+        border-radius: 999px;
+        font-weight: 700;
+        font-size: 1.1rem;
+        color: white;
+    }
+    .info-box {
+        background: #eff6ff;
+        border-left: 4px solid #2563eb;
+        border-radius: 8px;
+        padding: 1rem 1.2rem;
+        margin-top: 1.5rem;
+        font-size: 0.92rem;
+        color: #1e3a5f;
+    }
+    .stButton>button {
+        border-radius: 10px;
+        font-weight: 600;
+    }
+</style>
+""", unsafe_allow_html=True)
 
 device = "cuda" if torch.cuda.is_available() else "cpu"
 IMG_SIZE = 256
 class_names = ['No DR', 'Mild', 'Moderate', 'Severe', 'Proliferative DR']
+class_colors = {
+    'No DR': '#16a34a',
+    'Mild': '#84cc16',
+    'Moderate': '#f59e0b',
+    'Severe': '#f97316',
+    'Proliferative DR': '#dc2626'
+}
 CONFIDENCE_THRESHOLD = 45
 
 MODEL_PATH = 'phase2_best.pt'
@@ -94,39 +149,50 @@ def predict(image):
 
     return pred_class, confidence, probs, overlay_img
 
-st.title("Diabetic Retinopathy Detection")
-st.markdown("Upload a retinal fundus image for automated severity grading using Swin V2 Tiny.")
+# ---------- Header ----------
+st.markdown('<p class="main-title">👁️ Diabetic Retinopathy Detection</p>', unsafe_allow_html=True)
+st.markdown('<p class="subtitle">Upload a retinal fundus image for automated severity grading using Swin V2 Tiny</p>', unsafe_allow_html=True)
 
-uploaded_file = st.file_uploader("Choose a fundus image", type=['jpg', 'jpeg', 'png'])
+uploaded_file = st.file_uploader("📤 Choose a fundus image", type=['jpg', 'jpeg', 'png'])
 
 if uploaded_file is not None:
     image = Image.open(uploaded_file)
-    pred_class, confidence, probs, overlay_img = predict(image)
+    with st.spinner("Analyzing image..."):
+        pred_class, confidence, probs, overlay_img = predict(image)
+
+    pred_name = class_names[pred_class]
+    color = class_colors[pred_name]
 
     col1, col2 = st.columns(2)
     with col1:
-        st.image(image, caption="Uploaded Image", use_container_width=True)
+        st.image(image, caption="📷 Uploaded Image", use_container_width=True)
     with col2:
-        st.image(overlay_img, caption="Grad-CAM — Model Focus Area", use_container_width=True)
+        st.image(overlay_img, caption=" Grad-CAM — Model Focus Area", use_container_width=True)
 
-    st.markdown(f"### Prediction: **{class_names[pred_class]}**")
-    st.markdown(f"**Confidence: {confidence:.1f}%**")
+    st.markdown(f"""
+    <div class="result-card">
+        <span style="font-size:1.3rem; font-weight:700;">Prediction: {pred_name}</span><br><br>
+        <span class="confidence-badge" style="background-color:{color};">
+            {confidence:.1f}% confidence
+        </span>
+    </div>
+    """, unsafe_allow_html=True)
 
     if confidence < CONFIDENCE_THRESHOLD:
-        st.warning(f"⚠️ Low confidence ({confidence:.1f}%) — this image may not be a valid "
+        st.warning(f" Low confidence ({confidence:.1f}%) — this image may not be a valid "
                    f"retinal fundus photo, or quality may be too low for reliable grading.")
 
-    st.markdown("### Probability by Class")
+    st.markdown("####  Probability by Class")
     prob_data = {class_names[i]: float(probs[i]) for i in range(5)}
     st.bar_chart(prob_data)
 
-st.markdown("---")
 st.markdown("""
-### About this model
-- **Architecture**: Swin Transformer V2 (Tiny)
-- **Training**: Leak-free, class-balanced split of a diabetic retinopathy fundus image dataset
-- **Test set performance**: QWK = 0.7972, macro-F1 = 0.6369, accuracy = 0.72
-- **This is an academic prototype — not validated for clinical use.**
+<div class="info-box">
+<b>ℹ️ About this model</b><br>
+- Architecture: Swin Transformer V2 (Tiny)<br>
+- Training: Leak-free, class-balanced split of a diabetic retinopathy fundus image dataset<br>
+- Test set performance: QWK = 0.7972, macro-F1 = 0.6369, accuracy = 0.72<br>
 - Prediction confidence reflects the model's certainty for this specific image, not a
-  guarantee of correctness. See the full per-class precision/recall report for overall model reliability.
-""")
+  guarantee of correctness.
+</div>
+""", unsafe_allow_html=True)
