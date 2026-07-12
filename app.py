@@ -19,156 +19,145 @@ CONFIDENCE_THRESHOLD = 45
 MODEL_PATH = 'phase2_best.pt'
 DRIVE_FILE_ID = '1dw4dIKaRJkrNzG9EaFuSd_ihF7rv1rrE'
 
-# Ordinal severity palette — green (healthy) to red (advanced disease)
+# Ordinal severity palette — tuned to glow against a dark background
 SEVERITY_COLORS = {
-    'No DR':            '#2F9E44',
-    'Mild':              '#82C91E',
-    'Moderate':          '#F5A623',
-    'Severe':            '#E8590C',
-    'Proliferative DR':  '#C92A2A',
+    'No DR':            '#3DDC84',
+    'Mild':              '#A8E62F',
+    'Moderate':          '#FFC93C',
+    'Severe':            '#FF8A3D',
+    'Proliferative DR':  '#FF3D6E',
 }
 
 # ----------------------------------------------------------------------------
-# THEME — injected once, styles native Streamlit widgets + custom components
+# THEME — dark glassmorphic / neon magenta-purple, per requested reference
 # ----------------------------------------------------------------------------
 st.markdown("""
 <style>
-@import url('https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@500;600;700&family=IBM+Plex+Sans:wght@400;500;600&family=IBM+Plex+Mono:wght@500;600&display=swap');
+@import url('https://fonts.googleapis.com/css2?family=Poppins:wght@500;600;700;800&family=Inter:wght@400;500;600&family=IBM+Plex+Mono:wght@500;600&display=swap');
 
 :root {
-    --bg: #F6F8F9;
-    --bg-alt: #ECF1F3;
-    --ink: #10242E;
-    --ink-soft: #55707A;
-    --teal: #0E4F5C;
-    --cyan: #17A6B0;
-    --border: #D8E1E4;
+    --pink: #ff2d78;
+    --purple: #a855f7;
+    --blue-glow: #4f7bff;
+    --panel: rgba(28, 16, 48, 0.62);
+    --panel-border: rgba(255, 61, 145, 0.35);
+    --ink: #F2E9FB;
+    --ink-soft: #B9A9CE;
 }
 
-html, body, [class*="css"] { font-family: 'IBM Plex Sans', sans-serif; color: var(--ink); }
-.stApp { background: var(--bg); }
+html, body, [class*="css"] { font-family: 'Inter', sans-serif; color: var(--ink); }
 
-/* Hide default chrome clutter */
+.stApp {
+    background:
+        radial-gradient(circle at 8% 15%, rgba(180,30,90,0.35) 0%, transparent 40%),
+        radial-gradient(circle at 92% 10%, rgba(90,40,180,0.30) 0%, transparent 42%),
+        radial-gradient(circle at 15% 85%, rgba(200,20,90,0.28) 0%, transparent 38%),
+        radial-gradient(circle at 88% 80%, rgba(60,50,200,0.30) 0%, transparent 40%),
+        linear-gradient(160deg, #1a0f2e 0%, #140f28 45%, #0c1830 100%);
+    background-attachment: fixed;
+}
+
 #MainMenu, footer { visibility: hidden; }
 
 /* Hero */
-.hero-wrap {
-    background: linear-gradient(135deg, var(--teal) 0%, #093943 100%);
-    border-radius: 16px;
-    padding: 2.1rem 2.4rem;
-    margin-bottom: 1.6rem;
-    color: #EAF4F4;
-}
-.hero-eyebrow {
-    font-family: 'IBM Plex Mono', monospace;
-    font-size: 0.72rem;
-    letter-spacing: 0.14em;
-    text-transform: uppercase;
-    color: var(--cyan);
-    margin-bottom: 0.5rem;
+.hero-wrap { text-align: center; padding: 1.6rem 1rem 0.4rem 1rem; }
+.hero-icon {
+    width: 64px; height: 64px; border-radius: 50%;
+    background: linear-gradient(135deg, var(--pink), var(--purple));
+    display: flex; align-items: center; justify-content: center;
+    margin: 0 auto 1rem auto;
+    font-size: 1.7rem;
+    box-shadow: 0 0 28px rgba(255, 45, 120, 0.55);
 }
 .hero-title {
-    font-family: 'Space Grotesk', sans-serif;
-    font-weight: 700;
-    font-size: 2.05rem;
-    line-height: 1.15;
-    margin: 0 0 0.5rem 0;
+    font-family: 'Poppins', sans-serif;
+    font-weight: 800;
+    font-size: 2.2rem;
+    background: linear-gradient(90deg, #ff2d78, #a855f7);
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+    margin-bottom: 0.35rem;
 }
-.hero-sub {
-    font-size: 0.95rem;
-    color: #C7DEDE;
-    max-width: 640px;
-    line-height: 1.5;
-}
+.hero-sub { color: var(--ink-soft); font-size: 0.95rem; margin-bottom: 1.4rem; }
 
-/* Card container (wraps st.container(border=True)) */
+/* Glass card wrapper */
 div[data-testid="stVerticalBlockBorderWrapper"] {
-    background: #FFFFFF;
-    border-radius: 14px !important;
-    border: 1px solid var(--border) !important;
+    background: var(--panel) !important;
+    backdrop-filter: blur(14px);
+    border-radius: 22px !important;
+    border: 1px solid var(--panel-border) !important;
+    box-shadow: 0 0 40px rgba(168, 85, 247, 0.12);
 }
 
-/* File uploader restyle */
-[data-testid="stFileUploaderDropzone"] {
-    background: var(--bg-alt);
-    border: 1.5px dashed #9FB6BC;
-    border-radius: 12px;
-}
-[data-testid="stFileUploaderDropzone"]:hover { border-color: var(--cyan); }
-
-/* Section labels */
 .section-label {
     font-family: 'IBM Plex Mono', monospace;
     font-size: 0.72rem;
     letter-spacing: 0.12em;
     text-transform: uppercase;
     color: var(--ink-soft);
-    margin: 0 0 0.6rem 0;
+    margin: 0 0 0.8rem 0;
 }
 
-/* Result header */
+/* File uploader — dashed neon dropzone */
+[data-testid="stFileUploaderDropzone"] {
+    background: rgba(255, 45, 120, 0.06);
+    border: 1.5px dashed rgba(255, 61, 145, 0.55) !important;
+    border-radius: 16px;
+}
+[data-testid="stFileUploaderDropzone"]:hover { border-color: var(--pink) !important; }
+[data-testid="stFileUploaderDropzone"] section { color: var(--ink-soft); }
+[data-testid="stFileUploaderDropzone"] button {
+    background: linear-gradient(90deg, var(--pink), var(--purple)) !important;
+    color: #fff !important;
+    border: none !important;
+    border-radius: 999px !important;
+    font-weight: 600 !important;
+    box-shadow: 0 0 20px rgba(255, 45, 120, 0.45);
+}
+
+/* Result title / badge */
 .result-title {
-    font-family: 'Space Grotesk', sans-serif;
+    font-family: 'Poppins', sans-serif;
     font-weight: 700;
     font-size: 1.5rem;
     margin: 0 0 0.15rem 0;
+    color: var(--ink);
 }
-.result-conf {
-    font-family: 'IBM Plex Mono', monospace;
-    font-size: 0.85rem;
-    color: var(--ink-soft);
-}
+.result-conf { font-family: 'IBM Plex Mono', monospace; font-size: 0.85rem; color: var(--ink-soft); }
 
-/* Severity badge */
 .badge {
     display: inline-block;
     font-family: 'IBM Plex Mono', monospace;
     font-size: 0.72rem;
     font-weight: 600;
     letter-spacing: 0.04em;
-    color: #fff;
-    padding: 0.28rem 0.7rem;
+    color: #1a0f1e;
+    padding: 0.3rem 0.75rem;
     border-radius: 999px;
-    margin-bottom: 0.5rem;
+    margin-bottom: 0.6rem;
 }
 
-/* Confidence gauge (conic-gradient ring) */
+/* Confidence gauge */
 .gauge {
-    width: 108px; height: 108px;
-    border-radius: 50%;
-    display: flex; align-items: center; justify-content: center;
-    flex-shrink: 0;
+    width: 108px; height: 108px; border-radius: 50%;
+    display: flex; align-items: center; justify-content: center; flex-shrink: 0;
 }
 .gauge-inner {
-    width: 84px; height: 84px;
-    border-radius: 50%;
-    background: #fff;
+    width: 84px; height: 84px; border-radius: 50%;
+    background: #170F26;
     display: flex; flex-direction: column; align-items: center; justify-content: center;
 }
-.gauge-num { font-family: 'IBM Plex Mono', monospace; font-weight: 600; font-size: 1.15rem; }
+.gauge-num { font-family: 'IBM Plex Mono', monospace; font-weight: 600; font-size: 1.15rem; color: var(--ink); }
 .gauge-lbl { font-size: 0.6rem; color: var(--ink-soft); letter-spacing: 0.06em; text-transform: uppercase; }
 
-/* Severity spectrum — signature element */
-.spectrum-wrap { margin-top: 0.3rem; }
-.spectrum-track {
-    display: flex;
-    width: 100%;
-    height: 10px;
-    border-radius: 6px;
-    overflow: hidden;
-}
+/* Severity spectrum */
+.spectrum-wrap { margin-top: 0.4rem; }
+.spectrum-track { display: flex; width: 100%; height: 10px; border-radius: 6px; overflow: hidden; }
 .spectrum-seg { flex: 1; }
-.spectrum-labels {
-    display: flex;
-    width: 100%;
-    margin-top: 6px;
-}
+.spectrum-labels { display: flex; width: 100%; margin-top: 6px; }
 .spectrum-labels span {
-    flex: 1;
-    font-family: 'IBM Plex Mono', monospace;
-    font-size: 0.62rem;
-    color: var(--ink-soft);
-    text-align: center;
+    flex: 1; font-family: 'IBM Plex Mono', monospace; font-size: 0.6rem;
+    color: var(--ink-soft); text-align: center;
 }
 .spectrum-labels span.active { color: var(--ink); font-weight: 600; }
 .spectrum-pointer-row { display: flex; width: 100%; }
@@ -182,41 +171,43 @@ div[data-testid="stVerticalBlockBorderWrapper"] {
 }
 
 /* Probability bars */
-.prob-row { display: flex; align-items: center; gap: 0.7rem; margin-bottom: 0.55rem; }
+.prob-row { display: flex; align-items: center; gap: 0.7rem; margin-bottom: 0.6rem; }
 .prob-name { font-family: 'IBM Plex Mono', monospace; font-size: 0.75rem; width: 128px; flex-shrink: 0; color: var(--ink-soft); }
-.prob-track { flex: 1; background: var(--bg-alt); border-radius: 5px; height: 12px; overflow: hidden; }
+.prob-track { flex: 1; background: rgba(255,255,255,0.06); border-radius: 5px; height: 12px; overflow: hidden; }
 .prob-fill { height: 100%; border-radius: 5px; }
-.prob-pct { font-family: 'IBM Plex Mono', monospace; font-size: 0.75rem; width: 44px; text-align: right; flex-shrink: 0; }
+.prob-pct { font-family: 'IBM Plex Mono', monospace; font-size: 0.75rem; width: 44px; text-align: right; flex-shrink: 0; color: var(--ink); }
 
 /* Low-confidence notice */
 .notice {
-    background: #FFF4E5;
-    border: 1px solid #F5C177;
-    border-radius: 10px;
+    background: rgba(255, 138, 61, 0.12);
+    border: 1px solid rgba(255, 138, 61, 0.45);
+    border-radius: 12px;
     padding: 0.75rem 1rem;
     font-size: 0.85rem;
-    color: #7A4A00;
-    margin-top: 0.9rem;
+    color: #FFD8B0;
+    margin-top: 1rem;
+}
+
+/* CTA-style caption row under upload */
+.upload-caption {
+    text-align: center; font-size: 0.78rem; color: var(--ink-soft);
+    margin-top: 0.7rem; letter-spacing: 0.02em;
 }
 
 /* About footer */
 .about-card {
-    background: #FFFFFF;
-    border: 1px solid var(--border);
-    border-radius: 14px;
-    padding: 1.4rem 1.6rem;
+    background: var(--panel);
+    backdrop-filter: blur(14px);
+    border: 1px solid var(--panel-border);
+    border-radius: 22px;
+    padding: 1.5rem 1.7rem;
     margin-top: 1.6rem;
+    box-shadow: 0 0 40px rgba(168, 85, 247, 0.10);
 }
-.about-card h4 {
-    font-family: 'Space Grotesk', sans-serif;
-    margin-top: 0;
-}
-.about-meta {
-    font-family: 'IBM Plex Mono', monospace;
-    font-size: 0.78rem;
-    color: var(--ink-soft);
-    line-height: 1.9;
-}
+.about-card h4 { font-family: 'Poppins', sans-serif; margin-top: 0; color: var(--ink); }
+.about-meta { font-family: 'IBM Plex Mono', monospace; font-size: 0.78rem; color: var(--ink-soft); line-height: 1.9; }
+
+.stAlert { background: var(--panel) !important; border-radius: 14px !important; }
 </style>
 """, unsafe_allow_html=True)
 
@@ -293,11 +284,10 @@ def predict(image):
 # ----------------------------------------------------------------------------
 st.markdown("""
 <div class="hero-wrap">
-    <div class="hero-eyebrow">Swin V2 Tiny · Fundus Image Classifier</div>
+    <div class="hero-icon">👁️</div>
     <div class="hero-title">Diabetic Retinopathy Grading</div>
-    <div class="hero-sub">Upload a retinal fundus photograph to estimate DR severity on the
-    standard 5-stage scale, with a Grad-CAM overlay showing which regions of the retina
-    drove the prediction.</div>
+    <div class="hero-sub">Upload a retinal fundus photo — Swin V2 grades severity on the
+    standard 5-stage scale, with a Grad-CAM overlay showing the model's focus area.</div>
 </div>
 """, unsafe_allow_html=True)
 
@@ -312,6 +302,10 @@ with upload_card:
         "Choose a fundus image",
         type=['jpg', 'jpeg', 'png'],
         label_visibility="collapsed",
+    )
+    st.markdown(
+        '<div class="upload-caption">JPG · PNG supported &nbsp;•&nbsp; Processed locally &nbsp;•&nbsp; Instant grading</div>',
+        unsafe_allow_html=True,
     )
 
 if uploaded_file is not None:
@@ -349,7 +343,7 @@ if uploaded_file is not None:
             """, unsafe_allow_html=True)
         with head_r:
             st.markdown(f"""
-            <div class="gauge" style="background: conic-gradient({pred_color} {gauge_pct*3.6}deg, #E4EBED 0deg);">
+            <div class="gauge" style="background: conic-gradient({pred_color} {gauge_pct*3.6}deg, rgba(255,255,255,0.08) 0deg);">
                 <div class="gauge-inner">
                     <div class="gauge-num">{confidence:.0f}%</div>
                     <div class="gauge-lbl">confidence</div>
@@ -357,7 +351,7 @@ if uploaded_file is not None:
             </div>
             """, unsafe_allow_html=True)
 
-        # Signature element: ordinal severity spectrum with pointer
+        # Severity spectrum with pointer
         seg_html = "".join(
             f'<div class="spectrum-seg" style="background:{SEVERITY_COLORS[c]};"></div>'
             for c in class_names
@@ -418,8 +412,7 @@ st.markdown("""
         TEST SET &nbsp;·&nbsp; QWK 0.7972 &nbsp;|&nbsp; macro-F1 0.6369 &nbsp;|&nbsp; accuracy 0.72
     </div>
     <p style="margin-top:0.9rem; font-size:0.85rem; color:var(--ink-soft); line-height:1.6;">
-        This is an academic prototype — not validated for clinical use. Prediction confidence
-        reflects the model's certainty for this specific image, not a guarantee of correctness.
+       Prediction confidence reflects the model's certainty for this specific image, not a guarantee of correctness.
         See the full per-class precision/recall report for overall model reliability.
     </p>
 </div>
