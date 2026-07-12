@@ -78,7 +78,7 @@ html, body, [class*="css"] { font-family: 'Inter', sans-serif; color: var(--ink)
     -webkit-text-fill-color: transparent;
     margin-bottom: 0.35rem;
 }
-.hero-sub { color: var(--ink-soft); font-size: 0.95rem; margin-bottom: 1.4rem; }
+.hero-sub { color: var(--ink-soft); font-size: 0.98rem; margin-bottom: 1.8rem; }
 
 /* Glass card wrapper */
 div[data-testid="stVerticalBlockBorderWrapper"] {
@@ -87,15 +87,6 @@ div[data-testid="stVerticalBlockBorderWrapper"] {
     border-radius: 22px !important;
     border: 1px solid var(--panel-border) !important;
     box-shadow: 0 0 40px rgba(168, 85, 247, 0.12);
-}
-
-.section-label {
-    font-family: 'IBM Plex Mono', monospace;
-    font-size: 0.72rem;
-    letter-spacing: 0.12em;
-    text-transform: uppercase;
-    color: var(--ink-soft);
-    margin: 0 0 0.8rem 0;
 }
 
 /* File uploader — dashed neon dropzone */
@@ -189,11 +180,6 @@ div[data-testid="stVerticalBlockBorderWrapper"] {
 }
 
 /* CTA-style caption row under upload */
-.upload-caption {
-    text-align: center; font-size: 0.78rem; color: var(--ink-soft);
-    margin-top: 0.7rem; letter-spacing: 0.02em;
-}
-
 /* About footer */
 .about-card {
     background: var(--panel);
@@ -204,8 +190,13 @@ div[data-testid="stVerticalBlockBorderWrapper"] {
     margin-top: 1.6rem;
     box-shadow: 0 0 40px rgba(168, 85, 247, 0.10);
 }
-.about-card h4 { font-family: 'Poppins', sans-serif; margin-top: 0; color: var(--ink); }
-.about-meta { font-family: 'IBM Plex Mono', monospace; font-size: 0.78rem; color: var(--ink-soft); line-height: 1.9; }
+.about-card h4 { font-family: 'Poppins', sans-serif; margin-top: 0; color: var(--ink); font-weight: 600; }
+.chip-row { display: flex; gap: 0.6rem; flex-wrap: wrap; margin: 0.8rem 0 1rem 0; }
+.chip {
+    font-family: 'IBM Plex Mono', monospace; font-size: 0.72rem; color: var(--ink);
+    background: rgba(255,255,255,0.06); border: 1px solid rgba(255,255,255,0.1);
+    border-radius: 999px; padding: 0.32rem 0.8rem;
+}
 
 .stAlert { background: var(--panel) !important; border-radius: 14px !important; }
 </style>
@@ -286,8 +277,7 @@ st.markdown("""
 <div class="hero-wrap">
     <div class="hero-icon">👁️</div>
     <div class="hero-title">Diabetic Retinopathy Grading</div>
-    <div class="hero-sub">Upload a retinal fundus photo — Swin V2 grades severity on the
-    standard 5-stage scale, with a Grad-CAM overlay showing the model's focus area.</div>
+    <div class="hero-sub">Upload a fundus photo to grade DR severity, with a Grad-CAM view of the model's focus.</div>
 </div>
 """, unsafe_allow_html=True)
 
@@ -297,15 +287,10 @@ st.markdown("""
 # ----------------------------------------------------------------------------
 upload_card = st.container(border=True)
 with upload_card:
-    st.markdown('<div class="section-label">01 · Upload fundus image</div>', unsafe_allow_html=True)
     uploaded_file = st.file_uploader(
         "Choose a fundus image",
         type=['jpg', 'jpeg', 'png'],
         label_visibility="collapsed",
-    )
-    st.markdown(
-        '<div class="upload-caption">JPG · PNG supported &nbsp;•&nbsp; Processed locally &nbsp;•&nbsp; Instant grading</div>',
-        unsafe_allow_html=True,
     )
 
 if uploaded_file is not None:
@@ -319,7 +304,6 @@ if uploaded_file is not None:
     # --- Images ---
     img_card = st.container(border=True)
     with img_card:
-        st.markdown('<div class="section-label">02 · Image & model focus</div>', unsafe_allow_html=True)
         col1, col2 = st.columns(2)
         with col1:
             st.image(image, caption="Uploaded Image", use_container_width=True)
@@ -331,8 +315,6 @@ if uploaded_file is not None:
     # --- Result ---
     result_card = st.container(border=True)
     with result_card:
-        st.markdown('<div class="section-label">03 · Prediction</div>', unsafe_allow_html=True)
-
         gauge_pct = min(max(confidence, 0), 100)
         head_l, head_r = st.columns([3, 1])
         with head_l:
@@ -384,7 +366,6 @@ if uploaded_file is not None:
     # --- Probabilities ---
     prob_card = st.container(border=True)
     with prob_card:
-        st.markdown('<div class="section-label">04 · Probability by class</div>', unsafe_allow_html=True)
         for i, cname in enumerate(class_names):
             pct = float(probs[i]) * 100
             color = SEVERITY_COLORS[cname]
@@ -406,14 +387,13 @@ else:
 st.markdown("""
 <div class="about-card">
     <h4>About this model</h4>
-    <div class="about-meta">
-        ARCHITECTURE &nbsp;·&nbsp; Swin Transformer V2 (Tiny)<br>
-        TRAINING &nbsp;·&nbsp; Leak-free, class-balanced split of a diabetic retinopathy fundus image dataset<br>
-        TEST SET &nbsp;·&nbsp; QWK 0.7972 &nbsp;|&nbsp; macro-F1 0.6369 &nbsp;|&nbsp; accuracy 0.72
+    <div class="chip-row">
+        <span class="chip">Swin V2 Tiny</span>
+        <span class="chip">QWK 0.797</span>
+        <span class="chip">Accuracy 72%</span>
     </div>
-    <p style="margin-top:0.9rem; font-size:0.85rem; color:var(--ink-soft); line-height:1.6;">
-       Prediction confidence reflects the model's certainty for this specific image, not a guarantee of correctness.
-        See the full per-class precision/recall report for overall model reliability.
+    <p style="font-size:0.85rem; color:var(--ink-soft); line-height:1.6; margin:0;">
+        Confidence reflects certainty on this image only, not overall accuracy.
     </p>
 </div>
 """, unsafe_allow_html=True)
