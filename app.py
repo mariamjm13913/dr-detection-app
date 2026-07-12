@@ -397,8 +397,7 @@ with mid:
             </div>
         </div>
         <p class="about-note">
-            Academic prototype — not validated for clinical use. Confidence reflects certainty
-            on this image only, not overall accuracy.
+            Confidence reflects certainty on this image only, not overall accuracy.
         </p>
         """, unsafe_allow_html=True)
 
