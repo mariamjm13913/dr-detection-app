@@ -66,7 +66,6 @@ html, body, [class*="css"] { font-family: 'Inter', sans-serif; color: var(--ink)
     background: linear-gradient(135deg, var(--pink), var(--purple));
     display: flex; align-items: center; justify-content: center;
     margin: 0 auto 1rem auto;
-    font-size: 1.7rem;
     box-shadow: 0 0 28px rgba(255, 45, 120, 0.55);
 }
 .hero-title {
@@ -89,14 +88,44 @@ div[data-testid="stVerticalBlockBorderWrapper"] {
     box-shadow: 0 0 40px rgba(168, 85, 247, 0.12);
 }
 
-/* File uploader — dashed neon dropzone */
-[data-testid="stFileUploaderDropzone"] {
-    background: rgba(255, 45, 120, 0.06);
+/* Hero + upload combined card — dashed, centered, narrower (like reference) */
+div[data-testid="stVerticalBlockBorderWrapper"]:first-of-type {
     border: 1.5px dashed rgba(255, 61, 145, 0.55) !important;
-    border-radius: 16px;
+    max-width: 640px;
+    margin: 0 auto 1.6rem auto !important;
+    background: rgba(28, 16, 48, 0.55) !important;
+    padding: 0.4rem 0.6rem;
 }
-[data-testid="stFileUploaderDropzone"]:hover { border-color: var(--pink) !important; }
-[data-testid="stFileUploaderDropzone"] section { color: var(--ink-soft); }
+
+.upload-icon-wrap {
+    width: 46px; height: 46px; border-radius: 50%;
+    background: rgba(255, 61, 145, 0.12);
+    display: flex; align-items: center; justify-content: center;
+    margin: 0.4rem auto 0.9rem auto;
+}
+.upload-heading {
+    font-family: 'Poppins', sans-serif; font-weight: 700; font-size: 1.15rem;
+    text-align: center; color: var(--ink); margin-bottom: 0.3rem;
+}
+.upload-subtext {
+    text-align: center; font-size: 0.85rem; color: var(--ink-soft); margin-bottom: 0.9rem;
+}
+.upload-caption {
+    text-align: center; font-size: 0.76rem; color: var(--ink-soft);
+    margin-top: 0.8rem; letter-spacing: 0.01em;
+}
+
+/* Hide the native dropzone's own icon/instruction text — we supply our own above */
+[data-testid="stFileUploaderDropzoneInstructions"] svg,
+[data-testid="stFileUploaderDropzoneInstructions"] span,
+[data-testid="stFileUploaderDropzoneInstructions"] small {
+    display: none !important;
+}
+[data-testid="stFileUploaderDropzone"] {
+    justify-content: center !important;
+    border: none !important;
+    background: transparent !important;
+}
 [data-testid="stFileUploaderDropzone"] button {
     background: linear-gradient(90deg, var(--pink), var(--purple)) !important;
     color: #fff !important;
@@ -271,26 +300,41 @@ def predict(image):
 
 
 # ----------------------------------------------------------------------------
-# HERO
+# HERO + UPLOAD — merged into one centered card (matches reference layout)
 # ----------------------------------------------------------------------------
-st.markdown("""
-<div class="hero-wrap">
-    <div class="hero-icon">👁️</div>
-    <div class="hero-title">Diabetic Retinopathy Grading</div>
-    <div class="hero-sub">Upload a fundus photo to grade DR severity, with a Grad-CAM view of the model's focus.</div>
-</div>
-""", unsafe_allow_html=True)
+hero_card = st.container(border=True)
+with hero_card:
+    st.markdown("""
+    <div class="hero-wrap">
+        <div class="hero-icon">
+            <svg width="28" height="28" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+                <path d="M2 12C2 12 5.5 5 12 5C18.5 5 22 12 22 12C22 12 18.5 19 12 19C5.5 19 2 12 2 12Z" stroke="white" stroke-width="1.6" stroke-linejoin="round"/>
+                <circle cx="12" cy="12" r="3.2" stroke="white" stroke-width="1.6"/>
+                <circle cx="12" cy="12" r="1" fill="white"/>
+            </svg>
+        </div>
+        <div class="hero-title">Diabetic Retinopathy Grading</div>
+        <div class="hero-sub">Upload a fundus photo to grade DR severity, with a Grad-CAM view of the model's focus.</div>
+    </div>
+    <div class="upload-icon-wrap">
+        <svg width="22" height="22" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+            <path d="M12 15V4M12 4L7.5 8.5M12 4L16.5 8.5" stroke="#ff6fa8" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"/>
+            <path d="M4 15V17.5C4 18.6 4.9 19.5 6 19.5H18C19.1 19.5 20 18.6 20 17.5V15" stroke="#ff6fa8" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"/>
+        </svg>
+    </div>
+    <div class="upload-heading">Upload Fundus Image</div>
+    <div class="upload-subtext">Drag & drop here or use the button below</div>
+    """, unsafe_allow_html=True)
 
-
-# ----------------------------------------------------------------------------
-# UPLOAD
-# ----------------------------------------------------------------------------
-upload_card = st.container(border=True)
-with upload_card:
     uploaded_file = st.file_uploader(
         "Choose a fundus image",
         type=['jpg', 'jpeg', 'png'],
         label_visibility="collapsed",
+    )
+
+    st.markdown(
+        '<div class="upload-caption">JPG · PNG supported &nbsp;•&nbsp; Instant grading</div>',
+        unsafe_allow_html=True,
     )
 
 if uploaded_file is not None:
@@ -393,7 +437,8 @@ st.markdown("""
         <span class="chip">Accuracy 72%</span>
     </div>
     <p style="font-size:0.85rem; color:var(--ink-soft); line-height:1.6; margin:0;">
-        Confidence reflects certainty on this image only, not overall accuracy.
+        Academic prototype — not validated for clinical use. Confidence reflects certainty
+        on this image only, not overall accuracy.
     </p>
 </div>
 """, unsafe_allow_html=True)
