@@ -19,14 +19,13 @@ CONFIDENCE_THRESHOLD = 45
 MODEL_PATH = 'phase2_best.pt'
 DRIVE_FILE_ID = '1dw4dIKaRJkrNzG9EaFuSd_ihF7rv1rrE'
 
-# Ordinal severity palette — drawn from the fundus photograph itself:
-# healthy retina glow -> hemorrhage red, across an amber/gold clinical spine
+# Ordinal severity palette — tuned to glow against a dark background
 SEVERITY_COLORS = {
-    'No DR':            '#38D9A9',
-    'Mild':              '#8BD450',
-    'Moderate':          '#F5B942',
-    'Severe':            '#F2793A',
-    'Proliferative DR':  '#EF476F',
+    'No DR':            '#3DDC84',
+    'Mild':              '#A8E62F',
+    'Moderate':          '#FFC93C',
+    'Severe':            '#FF8A3D',
+    'Proliferative DR':  '#FF3D6E',
 }
 
 # ----------------------------------------------------------------------------
@@ -38,15 +37,15 @@ st.markdown("""
 @import url('https://fonts.googleapis.com/css2?family=Sora:wght@500;600;700;800&family=Inter:wght@400;500;600&family=IBM+Plex+Mono:wght@500;600&display=swap');
 
 :root {
-    --amber: #F5A24B;
-    --amber-soft: #F7C98A;
-    --teal: #3FD1C0;
-    --rose: #EF476F;
-    --bg-deep: #060B14;
-    --panel: rgba(14, 22, 38, 0.72);
-    --panel-border: rgba(245, 162, 75, 0.28);
-    --ink: #EEF3F9;
-    --ink-soft: #90A0B8;
+    --amber: #ff2d78;
+    --amber-soft: #ffa8cf;
+    --teal: #a855f7;
+    --rose: #4f7bff;
+    --bg-deep: #1a0f2e;
+    --panel: rgba(28, 16, 48, 0.62);
+    --panel-border: rgba(255, 61, 145, 0.35);
+    --ink: #F2E9FB;
+    --ink-soft: #B9A9CE;
 }
 
 html, body, [class*="css"] { font-family: 'Inter', sans-serif; color: var(--ink); }
@@ -54,11 +53,11 @@ html, body, [class*="css"] { font-family: 'Inter', sans-serif; color: var(--ink)
 /* ---------------- Ambient living background ---------------- */
 .stApp {
     background:
-        radial-gradient(circle at 12% 20%, rgba(245,162,75,0.16) 0%, transparent 42%),
-        radial-gradient(circle at 88% 15%, rgba(63,209,192,0.14) 0%, transparent 42%),
-        radial-gradient(circle at 20% 88%, rgba(239,71,111,0.12) 0%, transparent 40%),
-        radial-gradient(circle at 85% 82%, rgba(63,209,192,0.10) 0%, transparent 42%),
-        linear-gradient(160deg, #060B14 0%, #0A1220 50%, #070C16 100%);
+        radial-gradient(circle at 12% 20%, rgba(180,30,90,0.35) 0%, transparent 42%),
+        radial-gradient(circle at 88% 15%, rgba(90,40,180,0.30) 0%, transparent 42%),
+        radial-gradient(circle at 20% 88%, rgba(200,20,90,0.28) 0%, transparent 40%),
+        radial-gradient(circle at 85% 82%, rgba(60,50,200,0.30) 0%, transparent 42%),
+        linear-gradient(160deg, #1a0f2e 0%, #140f28 45%, #0c1830 100%);
     background-size: 180% 180%, 180% 180%, 180% 180%, 180% 180%, 100% 100%;
     animation: aurora-drift 26s ease-in-out infinite alternate;
     background-attachment: fixed;
@@ -112,7 +111,7 @@ html, body, [class*="css"] { font-family: 'Inter', sans-serif; color: var(--ink)
 }
 .hero-icon {
     width: 60px; height: 60px; border-radius: 50%;
-    background: radial-gradient(circle at 35% 30%, #FFD8A6, var(--amber) 55%, #C97A2E 100%);
+    background: linear-gradient(135deg, var(--amber), var(--teal));
     display: flex; align-items: center; justify-content: center;
     box-shadow: 0 0 30px rgba(245, 162, 75, 0.55), inset 0 0 12px rgba(255,255,255,0.25);
     position: relative; z-index: 2;
@@ -168,6 +167,13 @@ div[data-testid="stVerticalBlockBorderWrapper"]:not(:first-of-type) > div > div 
 
 .hero-upload-wrap { max-width: 640px; margin: 0 auto; }
 
+.free-upload {
+    max-width: 600px;
+    margin: 1.4rem auto 1.8rem auto;
+    position: relative;
+    z-index: 5;
+}
+
 .upload-caption {
     text-align: center; font-size: 0.76rem; color: var(--ink-soft);
     margin-top: 0.8rem; letter-spacing: 0.02em;
@@ -184,7 +190,7 @@ div[data-testid="stVerticalBlockBorderWrapper"]:not(:first-of-type) > div > div 
 [data-testid="stFileUploaderDropzone"] section { color: var(--ink-soft); justify-content: center; }
 [data-testid="stFileUploaderDropzone"] button {
     background: linear-gradient(90deg, var(--amber), var(--teal)) !important;
-    color: #06131a !important;
+    color: #fff !important;
     border: none !important;
     border-radius: 999px !important;
     font-weight: 700 !important;
@@ -209,7 +215,7 @@ div[data-testid="stVerticalBlockBorderWrapper"]:not(:first-of-type) > div > div 
     font-size: 0.72rem;
     font-weight: 700;
     letter-spacing: 0.06em;
-    color: #0B1220;
+    color: #1a0f1e;
     padding: 0.32rem 0.85rem;
     border-radius: 999px;
     margin-bottom: 0.7rem;
@@ -223,7 +229,7 @@ div[data-testid="stVerticalBlockBorderWrapper"]:not(:first-of-type) > div > div 
 }
 .gauge-inner {
     width: 90px; height: 90px; border-radius: 50%;
-    background: #0C1524;
+    background: #170F26;
     display: flex; flex-direction: column; align-items: center; justify-content: center;
 }
 .gauge-num { font-family: 'IBM Plex Mono', monospace; font-weight: 600; font-size: 1.2rem; color: var(--ink); }
@@ -379,9 +385,9 @@ with mid:
             <div class="scan-rings">
                 <div class="hero-icon">
                     <svg width="26" height="26" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
-                        <path d="M2 12C2 12 5.5 5 12 5C18.5 5 22 12 22 12C22 12 18.5 19 12 19C5.5 19 2 12 2 12Z" stroke="#0B1220" stroke-width="1.7" stroke-linejoin="round"/>
-                        <circle cx="12" cy="12" r="3.2" stroke="#0B1220" stroke-width="1.7"/>
-                        <circle cx="12" cy="12" r="1" fill="#0B1220"/>
+                        <path d="M2 12C2 12 5.5 5 12 5C18.5 5 22 12 22 12C22 12 18.5 19 12 19C5.5 19 2 12 2 12Z" stroke="white" stroke-width="1.6" stroke-linejoin="round"/>
+                        <circle cx="12" cy="12" r="3.2" stroke="white" stroke-width="1.6"/>
+                        <circle cx="12" cy="12" r="1" fill="white"/>
                     </svg>
                 </div>
             </div>
@@ -390,16 +396,16 @@ with mid:
         </div>
         """, unsafe_allow_html=True)
 
-        uploaded_file = st.file_uploader(
-            "Choose a fundus image",
-            type=['jpg', 'jpeg', 'png'],
-            label_visibility="collapsed",
-        )
-
-        st.markdown(
-            '<div class="upload-caption">JPG · PNG supported &nbsp;•&nbsp; Instant grading</div>',
-            unsafe_allow_html=True,
-        )
+    st.markdown('<div class="free-upload">', unsafe_allow_html=True)
+    uploaded_file = st.file_uploader(
+        "Choose a fundus image",
+        type=['jpg', 'jpeg', 'png'],
+        label_visibility="collapsed",
+    )
+    st.markdown(
+        '<div class="upload-caption">JPG · PNG supported &nbsp;•&nbsp; Instant grading</div></div>',
+        unsafe_allow_html=True,
+    )
 
     if uploaded_file is None:
         st.markdown(
