@@ -57,6 +57,17 @@ html, body, [class*="css"] { font-family: 'Inter', sans-serif; color: var(--ink)
     background-attachment: fixed;
 }
 
+.block-container {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    min-height: 92vh;
+    padding-top: 2rem;
+    padding-bottom: 2rem;
+}
+.block-container > div { width: 100%; }
+
 #MainMenu, footer { visibility: hidden; }
 
 /* Hero */
@@ -303,26 +314,25 @@ with mid:
             unsafe_allow_html=True,
         )
 
-        if uploaded_file is None:
-            st.markdown(
-                '<div class="status-line">Upload a fundus image above to run a grading.</div>',
-                unsafe_allow_html=True,
-            )
+    if uploaded_file is None:
+        st.markdown(
+            '<div class="status-line">Upload a fundus image above to run a grading.</div>',
+            unsafe_allow_html=True,
+        )
 
+    about_card = st.container(border=True)
+    with about_card:
         st.markdown("""
-        <div class="inner-divider"></div>
-        <div class="about-inline">
-            <h4>About this model</h4>
-            <div class="chip-row">
-                <span class="chip">Swin V2 Tiny</span>
-                <span class="chip">QWK 0.797</span>
-                <span class="chip">Accuracy 72%</span>
-            </div>
-            <p style="font-size:0.85rem; color:var(--ink-soft); line-height:1.6; margin:0;">
-                Academic prototype — not validated for clinical use. Confidence reflects certainty
-                on this image only, not overall accuracy.
-            </p>
+        <h4>About this model</h4>
+        <div class="chip-row">
+            <span class="chip">Swin V2 Tiny</span>
+            <span class="chip">QWK 0.797</span>
+            <span class="chip">Accuracy 72%</span>
         </div>
+        <p style="font-size:0.85rem; color:var(--ink-soft); line-height:1.6; margin:0;">
+            Academic prototype — not validated for clinical use. Confidence reflects certainty
+            on this image only, not overall accuracy.
+        </p>
         """, unsafe_allow_html=True)
 
 if uploaded_file is not None:
