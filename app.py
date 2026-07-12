@@ -188,18 +188,11 @@ div[data-testid="stVerticalBlockBorderWrapper"] {
 
 /* CTA-style caption row under upload */
 /* About footer */
-.about-card {
-    background: var(--panel);
-    backdrop-filter: blur(14px);
-    border: 1px solid var(--panel-border);
-    border-radius: 20px;
-    padding: 1.2rem 1.5rem;
-    margin: 1.4rem auto 0 auto;
-    max-width: 640px;
-    box-shadow: 0 0 40px rgba(168, 85, 247, 0.10);
-}
-.about-card h4 { font-family: 'Poppins', sans-serif; margin-top: 0; color: var(--ink); font-weight: 600; }
+/* About footer (now rendered inline inside the main card) */
+.about-card h4, .about-inline h4 { font-family: 'Poppins', sans-serif; margin-top: 0; color: var(--ink); font-weight: 600; }
 .chip-row { display: flex; gap: 0.6rem; flex-wrap: wrap; margin: 0.8rem 0 1rem 0; }
+.inner-divider { border-top: 1px solid rgba(255,255,255,0.08); margin: 1.5rem 0 1.3rem 0; }
+.status-line { text-align: center; font-size: 0.85rem; color: var(--ink-soft); margin: 1rem 0 0.2rem 0; }
 .chip {
     font-family: 'IBM Plex Mono', monospace; font-size: 0.72rem; color: var(--ink);
     background: rgba(255,255,255,0.06); border: 1px solid rgba(255,255,255,0.1);
@@ -310,6 +303,28 @@ with mid:
             unsafe_allow_html=True,
         )
 
+        if uploaded_file is None:
+            st.markdown(
+                '<div class="status-line">Upload a fundus image above to run a grading.</div>',
+                unsafe_allow_html=True,
+            )
+
+        st.markdown("""
+        <div class="inner-divider"></div>
+        <div class="about-inline">
+            <h4>About this model</h4>
+            <div class="chip-row">
+                <span class="chip">Swin V2 Tiny</span>
+                <span class="chip">QWK 0.797</span>
+                <span class="chip">Accuracy 72%</span>
+            </div>
+            <p style="font-size:0.85rem; color:var(--ink-soft); line-height:1.6; margin:0;">
+                Academic prototype — not validated for clinical use. Confidence reflects certainty
+                on this image only, not overall accuracy.
+            </p>
+        </div>
+        """, unsafe_allow_html=True)
+
 if uploaded_file is not None:
     image = Image.open(uploaded_file)
     pred_class, confidence, probs, overlay_img = predict(image)
@@ -394,22 +409,4 @@ if uploaded_file is not None:
             </div>
             """, unsafe_allow_html=True)
 
-else:
-    st.info("Upload a fundus image above to run a grading.")
 
-
-# ----------------------------------------------------------------------------
-# ABOUT
-# ----------------------------------------------------------------------------
-st.markdown("""
-<div class="about-card">
-    <h4>About this model</h4>
-    <div class="chip-row">
-        <span class="chip">Swin V2 Tiny</span>
-        <span class="chip">QWK 0.797</span>
-        <span class="chip">Accuracy 72%</span>
-    </div>
-    <p Confidence reflects certainty on this image only, not overall accuracy.
-    </p>  
-</div>
-""", unsafe_allow_html=True)
