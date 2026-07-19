@@ -384,15 +384,15 @@ with mid:
         </div>
         <div class="stat-row">
             <div class="stat-block">
-                <div class="stat-num">Swin V2</div>
+                <div class="stat-num">SwinVit Fusion</div>
                 <div class="stat-label">Architecture</div>
             </div>
             <div class="stat-block">
-                <div class="stat-num">0.797</div>
+                <div class="stat-num">0.8047</div>
                 <div class="stat-label">QWK Score</div>
             </div>
             <div class="stat-block">
-                <div class="stat-num">72%</div>
+                <div class="stat-num">74%</div>
                 <div class="stat-label">Accuracy</div>
             </div>
         </div>
@@ -484,5 +484,3 @@ if uploaded_file is not None:
                 <div class="prob-pct">{pct:.1f}%</div>
             </div>
             """, unsafe_allow_html=True)
-
-
